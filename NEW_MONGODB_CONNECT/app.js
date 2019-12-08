@@ -1,60 +1,43 @@
-const MongoClient = require ('mongodb').MongoClient;
+var express = require('express');
+var bodyParser = require('body-parser');
+var path = require('path');
+var pug = require('pug');
 
-//Connection
-const url = 'mongodb://localhost:27017/myproject';
+var port = 3000;
 
-MongoClient.connect(url, function(err, client){
-		if(err){
-			return console.dir(err);
-		}
-		console.log('Connect to MongoDB');
+var app = express();
 
-		InsertDocuments(client, function(){
-			client.close();
-		});	
 
+app.use(function(req, res, next){
+	console.log('Time: ', Date.now());
+	next();
 });
 
-const InsertDocument = function (client, callback){
-	//get Collection
-	const dbo = client.db("myproject");
-	console.log(dbo);
-	//insert Docs
-	dbo.collection("users").insert({
-			name: 'Carlos  Campos',
-			email: 'carlossalim@hotmail.com'
-	}, function(err,result){
-		if(err){
-			return console.dir(err);
-		}
-		console.log('Inserted document');
-		console.log(result);
-		callback(result);
-	});	
+//app.set('view engine','pug');
+app.set('view engine','ejs');
+app.set('views',path.join(__dirname,'views'));
 
-}
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(express.static(path.join(__dirname, 'public')));
 
-const InsertDocuments = function (client, callback){
-	//get Collection
-	const dbo = client.db("myproject");
-	console.log(dbo);
-	//insert Docs
-	dbo.collection("users").insertMany([{
-			name: 'Carlos  2',
-			email: 'carlossalim@hotmail.com'
-			},{
-			name: 'Carlos  3',
-			email: 'carlossalim@hotmail.com'
-			},{
-			name: 'Carlos  4',
-			email: 'carlossalim@hotmail.com'
-			}], function(err,result){
-		if(err){
-			return console.dir(err);
-		}
-		console.log('Inserted document');
-		console.log(result);
-		callback(result);
-	});	
+app.get('/', function(req, res){
+	res.render('index', {
+							title:'This is the title',
+							title2:'This is the second title',
+							showTitle: true,
+							people: ['Carlos', 'Jose', 'Heleno']
+						});
+});
 
-}
+app.get('/about', function(req, res){
+	res.render('about');	
+});
+app.get('/contact', function(req, res){
+	res.render('contact');	
+});
+
+app.listen(port);
+console.log('Server started on port '+port);
+
+module.exports = app;
